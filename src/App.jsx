@@ -1,0 +1,14 @@
+import { useState } from 'react'
+import { SAMPLE_TEXT } from './constants'
+import { transformText } from './services/transformService'
+import ModeTabs from './components/ModeTabs'
+import InputPanel from './components/InputPanel'
+import OutputPanel from './components/OutputPanel'
+const INITIAL_MODE='summarize',INITIAL_TONE='Simple',INITIAL_TARGET='Tamil'
+export default function App(){
+ const [mode,setMode]=useState(INITIAL_MODE),[tone,setTone]=useState(INITIAL_TONE),[target,setTarget]=useState(INITIAL_TARGET),[text,setText]=useState(''),[output,setOutput]=useState(''),[copied,setCopied]=useState(false),[loading,setLoading]=useState(false),[error,setError]=useState('')
+ const clear=()=>{setText('');setOutput('');setError('')}; const loadSample=()=>{setText(SAMPLE_TEXT);setOutput('');setError('')}
+ async function copy(){if(!output)return;try{await navigator.clipboard.writeText(output);setCopied(true);window.setTimeout(()=>setCopied(false),1500)}catch{setError('Unable to copy the output. Please copy it manually.')}}
+ async function transform(){if(!text.trim())return;setLoading(true);setError('');setOutput('');try{const result=await transformText({mode,text,tone,target});setOutput(result||'The API returned an empty response.')}catch(e){setError(`Transform failed: ${e.response?.data?.message||e.message}`)}finally{setLoading(false)}}
+ return <main className="min-h-screen bg-zinc-950 text-zinc-50"><div className="mx-auto max-w-4xl px-4 py-10"><header className="mb-8"><h1 className="text-3xl font-semibold tracking-tight">AI Text Transformer</h1><p className="mt-2 text-zinc-300">Summarize, rewrite, and translate</p></header><section className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 shadow-2xl shadow-black/10"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><ModeTabs mode={mode} onModeChange={m=>{setMode(m);setError('')}}/><div className="flex items-center gap-2"><button type="button" onClick={loadSample} className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800">Load sample</button><button type="button" onClick={clear} className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800">Clear</button></div></div><div className="mt-4 grid gap-4 md:grid-cols-2"><InputPanel mode={mode} tone={tone} target={target} text={text} loading={loading} onTextChange={setText} onToneChange={setTone} onTargetChange={setTarget} onTransform={transform}/><OutputPanel output={output} copied={copied?'Copied!':'Copy'} onCopy={copy}/></div>{error&&<div role="alert" className="mt-4 rounded-xl border border-red-900/60 bg-red-950/30 px-4 py-3 text-sm text-red-300">{error}</div>}</section><footer className="mt-8 text-xs text-zinc-600">Built with React, Vite, Tailwind CSS, and Axios.</footer></div></main>
+}

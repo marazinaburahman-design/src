@@ -1,0 +1,2 @@
+import { MODES } from '../constants'
+export default function ModeTabs({mode,onModeChange}){return <div className="flex flex-wrap items-center gap-2">{MODES.map(item=><button key={item.key} type="button" onClick={()=>onModeChange(item.key)} className={`rounded-full px-4 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-red-500/50 ${mode===item.key?'bg-red-700 text-white':'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>{item.label}</button>)}</div>}
